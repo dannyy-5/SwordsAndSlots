@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#101319">
+  <title>Slots &amp; Daggers</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="game-shell">
+    <header class="topbar">
+      <a class="brand" href="#top" aria-label="Slots and Daggers home"><span class="brand-mark">✦</span><span>SLOTS <i>&amp;</i> DAGGERS</span></a>
+      <div class="top-actions"><span class="status-dot"></span><span>RUN <strong id="runNumber">01</strong></span><button class="icon-button" id="helpButton" aria-label="Open how to play">?</button></div>
+    </header>
+
+    <section class="intro" id="top">
+      <div><p class="eyebrow">A ROGUE-LIKE REEL GAME</p><h1>Spin the odds.<br><em>Draw steel.</em></h1></div>
+      <p class="intro-copy">Stack symbols to build a fortune, then spend your dagger charge on monsters waiting beyond the reels.</p>
+    </section>
+
+    <section class="dashboard">
+      <aside class="stats-panel">
+        <div class="panel-label">RUN LEDGER <span>● LIVE</span></div>
+        <div class="balance-block"><p>COINS</p><strong id="coins">100</strong><span class="coin-icon">◈</span></div>
+        <div class="stat-row"><span>BEST RUN</span><strong id="bestRun">100</strong></div>
+        <div class="stat-row"><span>SPINS</span><strong id="spins">0</strong></div>
+        <div class="stat-row"><span>ENEMIES</span><strong id="enemiesDefeated">0</strong></div>
+        <div class="charge-wrap"><div class="stat-row"><span>DAGGER CHARGE</span><strong id="chargeValue">0 / 3</strong></div><div class="charge-track"><span id="chargeBar"></span></div></div>
+        <button class="ghost-button" id="resetButton">↻ RESET RUN</button>
+      </aside>
+
+      <section class="machine-panel" aria-label="Slot machine">
+        <div class="machine-head"><div><p class="eyebrow">THE IRON JACKPOT</p><h2>MAKE YOUR MOVE</h2></div><div class="round-badge" id="roundBadge">ROUND 01</div></div>
+        <div class="reels" id="reels" aria-live="polite">
+          <div class="reel"><span>♠</span></div><div class="reel"><span>✦</span></div><div class="reel"><span>◈</span></div>
+        </div>
+        <div class="machine-message" id="machineMessage">The house is quiet. Make some noise.</div>
+        <div class="controls"><div class="bet-control"><label for="bet">WAGER</label><div class="stepper"><button id="betDown" aria-label="Lower wager">−</button><output id="betValue">5</output><button id="betUp" aria-label="Raise wager">+</button></div></div><button class="spin-button" id="spinButton"><span>SPIN REELS</span><b>↯</b></button></div>
+        <label class="auto-toggle"><input type="checkbox" id="autoSpin"><span class="toggle"></span>AUTO-SPIN <small>until broke</small></label>
+        <div class="payout-strip"><span>TRIPLE DAGGER <b>+100</b></span><span>TRIPLE CROWN <b>+75</b></span><span>TRIPLE GEM <b>+40</b></span></div>
+      </section>
+
+      <aside class="combat-panel" id="combatPanel">
+        <div class="panel-label">DAGGER DEN <span id="combatState">LOCKED</span></div>
+        <div class="enemy-scene"><div class="enemy-glow"></div><div class="enemy" id="enemyArt">☠</div><div class="enemy-name" id="enemyName">NO TARGET</div><div class="enemy-health"><span id="enemyHealthBar"></span></div></div>
+        <p class="combat-copy" id="combatCopy">Land three daggers on the reels to unlock a target.</p>
+        <div class="combat-actions"><button class="action-button attack" id="attackButton" disabled><span>⚔</span> STRIKE <kbd>SPACE</kbd></button><button class="action-button guard" id="guardButton" disabled><span>◇</span> GUARD</button></div>
+      </aside>
+    </section>
+
+    <section class="log-section"><div class="section-heading"><p class="eyebrow">FIELD NOTES</p><h2>RECENT EVENTS</h2></div><div class="event-log" id="eventLog"><div class="log-entry"><span class="log-time">NOW</span><span>Welcome to the Iron Jackpot. Your first wager is on the house.</span><b class="log-neutral">READY</b></div></div></section>
+
+    <footer><span>© 2024 IRON JACKPOT CO.</span><span>LUCK IS A WEAPON</span><span><button class="text-button" id="footerHelp">HOW TO PLAY ↗</button></span></footer>
+  </main>
+  <dialog id="helpDialog"><button class="dialog-close" id="closeHelp" aria-label="Close help">×</button><p class="eyebrow">FIELD MANUAL</p><h2>PLAY WITH YOUR LUCK.</h2><p>Choose a wager and spin. Matching symbols pay out, while every dagger adds charge to your Dagger Den. Three daggers unlock a monster.</p><div class="help-grid"><div><strong>✦</strong><span>STAR<br><small>2x wager</small></span></div><div><strong>◈</strong><span>GEM<br><small>3x wager</small></span></div><div><strong>♛</strong><span>CROWN<br><small>5x wager</small></span></div><div><strong>☠</strong><span>DAGGER<br><small>charge den</small></span></div></div><p class="dialog-note">In combat, strike to deal damage. Guard restores 10 coins but gives the monster a chance to hit. Defeat it to collect a bounty and keep spinning.</p></dialog>
+  <div class="toast" id="toast" role="status"></div>
+  <script src="script.js"></script>
+</body>
+</html>
