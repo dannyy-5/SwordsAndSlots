@@ -1,77 +1,9 @@
-const symbols = [
-  { icon: '✦', name: 'STAR', multiplier: 2 },
-  { icon: '◈', name: 'GEM', multiplier: 3 },
-  { icon: '♛', name: 'CROWN', multiplier: 5 },
-  { icon: '☠', name: 'DAGGER', multiplier: 0 },
-  { icon: '✹', name: 'SUN', multiplier: 8 }
-];
-const enemies = [
-  { name: 'THE WARDEN', art: '☠', hp: 3, bounty: 80 },
-  { name: 'IRON SHADE', art: '♞', hp: 4, bounty: 110 },
-  { name: 'THE RED KNIGHT', art: '⚔', hp: 5, bounty: 150 }
-];
-const state = { coins: 100, best: 100, spins: 0, enemies: 0, charge: 0, bet: 5, round: 1, locked: false, enemy: null, enemyHp: 0, guarding: false };
-const $ = (id) => document.getElementById(id);
-const reels = [...document.querySelectorAll('.reel')];
-
-function updateUI() {
-  $('coins').textContent = state.coins;
-  $('bestRun').textContent = state.best;
-  $('spins').textContent = state.spins;
-  $('enemiesDefeated').textContent = state.enemies;
-  $('chargeValue').textContent = `${state.charge} / 3`;
-  $('chargeBar').style.width = `${state.charge / 3 * 100}%`;
-  $('betValue').textContent = state.bet;
-  $('roundBadge').textContent = `ROUND ${String(state.round).padStart(2, '0')}`;
-  $('runNumber').textContent = String(state.round).padStart(2, '0');
-}
-function addLog(message, result = 'log-neutral') {
-  const entry = document.createElement('div'); entry.className = 'log-entry';
-  entry.innerHTML = `<span class="log-time">${String(state.round).padStart(2, '0')}</span><span>${message}</span><b class="${result}">${result === 'log-loss' ? 'LOSS' : result === 'log-win' ? 'WIN' : 'NOTE'}</b>`;
-  $('eventLog').prepend(entry);
-  while ($('eventLog').children.length > 5) $('eventLog').lastElementChild.remove();
-}
-function toast(message) { const element = $('toast'); element.textContent = message; element.classList.add('show'); setTimeout(() => element.classList.remove('show'), 2100); }
-function randomSymbol() { return symbols[Math.floor(Math.random() * symbols.length)]; }
-function showSymbols(result) { reels.forEach((reel, index) => { reel.querySelector('span').textContent = result[index].icon; reel.querySelector('span').setAttribute('aria-label', result[index].name); }); }
-function spin() {
-  if (state.locked) return;
-  if (state.coins < state.bet) { toast('Not enough coins for that wager.'); $('autoSpin').checked = false; return; }
-  state.locked = true; state.coins -= state.bet; state.spins += 1; updateUI(); $('spinButton').disabled = true;
-  reels.forEach((reel) => { reel.classList.remove('win'); reel.classList.add('spinning'); });
-  const result = [randomSymbol(), randomSymbol(), randomSymbol()];
-  setTimeout(() => { reels.forEach((reel) => reel.classList.remove('spinning')); showSymbols(result); resolveSpin(result); }, 760);
-}
-function resolveSpin(result) {
-  const daggers = result.filter((symbol) => symbol.name === 'DAGGER').length;
-  const names = result.map((symbol) => symbol.name);
-  let payout = 0; let message = 'No match. The house keeps its edge.'; let resultClass = 'log-loss';
-  if (names.every((name) => name === 'DAGGER')) { payout = 100; message = 'TRIPLE DAGGER. The den doors swing open.'; resultClass = 'log-win'; }
-  else if (names[0] === names[1] && names[1] === names[2]) { payout = state.bet * result[0].multiplier; message = `TRIPLE ${names[0]}. The reels pay ${payout} coins.`; resultClass = 'log-win'; }
-  else if (names[0] === names[1] || names[1] === names[2] || names[0] === names[2]) { payout = state.bet; message = `A pair of ${names.find((name, index) => names.indexOf(name) !== index)} returns your wager.`; resultClass = 'log-win'; }
-  if (payout) { state.coins += payout; reels.forEach((reel) => reel.classList.add('win')); }
-  if (daggers) { state.charge = Math.min(3, state.charge + daggers); message += ` +${daggers} dagger charge.`; }
-  state.best = Math.max(state.best, state.coins); state.round += 1; $('machineMessage').textContent = message; addLog(message, resultClass);
-  if (state.charge >= 3 && !state.enemy) unlockEnemy();
-  state.locked = false; $('spinButton').disabled = false; updateUI();
-  if ($('autoSpin').checked && state.coins >= state.bet && !state.enemy) setTimeout(spin, 650);
-}
-function unlockEnemy() {
-  state.enemy = enemies[state.enemies % enemies.length]; state.enemyHp = state.enemy.hp;
-  $('combatPanel').classList.add('ready'); $('combatState').textContent = 'TARGET LOCKED'; $('enemyArt').textContent = state.enemy.art; $('enemyName').textContent = state.enemy.name; $('combatCopy').textContent = `${state.enemy.name} blocks the way. Strike before it strikes back.`; $('attackButton').disabled = false; $('guardButton').disabled = false; $('enemyHealthBar').style.width = '100%'; toast(`${state.enemy.name} entered the Dagger Den.`); addLog(`${state.enemy.name} is waiting in the den.`);
-}
-function combatTurn(action) {
-  if (!state.enemy) return;
-  if (action === 'attack') { state.enemyHp -= 1; $('combatCopy').textContent = state.enemyHp > 0 ? 'Clean hit. The target is still standing.' : 'The target falls. Collect your bounty.'; }
-  else { state.guarding = true; state.coins += 10; $('combatCopy').textContent = 'Guard raised. You salvage 10 coins, but the target advances.'; }
-  $('enemyHealthBar').style.width = `${Math.max(0, state.enemyHp / state.enemy.hp * 100)}%`;
-  if (state.enemyHp <= 0) { const defeated = state.enemy; state.coins += defeated.bounty; state.enemies += 1; state.charge = 0; state.enemy = null; state.guarding = false; $('combatPanel').classList.remove('ready'); $('combatState').textContent = 'CLEARED'; $('enemyName').textContent = 'NO TARGET'; $('enemyArt').textContent = '☠'; $('combatCopy').textContent = `Bounty collected: +${defeated.bounty} coins. Spin again.`; $('attackButton').disabled = true; $('guardButton').disabled = true; addLog(`${defeated.name} defeated. Bounty +${defeated.bounty}.`, 'log-win'); toast(`Den cleared. +${defeated.bounty} coins.`); updateUI(); return; }
-  updateUI();
-}
-$('spinButton').addEventListener('click', spin); $('attackButton').addEventListener('click', () => combatTurn('attack')); $('guardButton').addEventListener('click', () => combatTurn('guard'));
-$('betDown').addEventListener('click', () => { if (!state.locked) { state.bet = Math.max(1, state.bet - 1); updateUI(); } });
-$('betUp').addEventListener('click', () => { if (!state.locked) { state.bet = Math.min(25, state.bet + 1); updateUI(); } });
-document.addEventListener('keydown', (event) => { if (event.code === 'Space' && state.enemy && !state.locked) { event.preventDefault(); combatTurn('attack'); } });
-$('resetButton').addEventListener('click', () => { Object.assign(state, { coins: 100, best: 100, spins: 0, enemies: 0, charge: 0, bet: 5, round: 1, locked: false, enemy: null, enemyHp: 0 }); $('eventLog').innerHTML = '<div class="log-entry"><span class="log-time">NOW</span><span>Run reset. The house is waiting.</span><b class="log-neutral">READY</b></div>'; $('combatPanel').classList.remove('ready'); $('combatState').textContent = 'LOCKED'; $('enemyArt').textContent = '☠'; $('enemyName').textContent = 'NO TARGET'; $('combatCopy').textContent = 'Land three daggers on the reels to unlock a target.'; $('attackButton').disabled = true; $('guardButton').disabled = true; updateUI(); });
-const dialog = $('helpDialog'); $('helpButton').addEventListener('click', () => dialog.showModal()); $('footerHelp').addEventListener('click', () => dialog.showModal()); $('closeHelp').addEventListener('click', () => dialog.close());
-updateUI();
+const $=id=>document.getElementById(id), symbols=[['✦','STAR',2],['◈','GEM',3],['♛','CROWN',5],['☠','DAGGER',0],['✹','SUN',8]], bosses=[['THE WARDEN','☠',3,80],['IRON SHADE','♞',4,110],['RED KNIGHT','⚔',5,150],['VAULT KING','♛',6,220]], relics=[['✹','SUN SHARD'],['◈','DEEP GEM'],['⚔','WAR EDGE']], s={coins:100,best:100,spins:0,bosses:0,charge:0,bet:5,round:1,enemy:null,hp:0,locked:false,risk:false,lucky:false,class:'assassin',relics:[],level:0,sound:true,contract:0};const reels=[...document.querySelectorAll('.reel')];
+function ui(){ $('coins').textContent=s.coins;$('best').textContent=s.best;$('spins').textContent=s.spins;$('bosses').textContent=s.bosses;$('charge').textContent=`${s.charge} / 3`;$('chargeBar').style.width=s.charge/3*100+'%';$('bet').textContent=s.bet;$('round').textContent='ROUND '+String(s.round).padStart(2,'0');$('run').textContent=String(s.round).padStart(2,'0');$('relicCount').textContent=`${s.relics.length} / 3`;$('level').textContent=s.level;$('progress').textContent=s.contract>=3?'COMPLETE +60 ◈':`${s.contract} / 3`;$('contract').textContent=s.contract>=3?'Contract complete':'Win 3 spins';let b=bosses[s.bosses%bosses.length];$('next').textContent=b[0];$('bounty').textContent=b[3]}
+function note(x){$('result').textContent=x;$('log').textContent=x}function toast(x){let t=$('toast');t.textContent=x;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800)}function tone(n=440){if(!s.sound)return;try{let a=new AudioContext(),o=a.createOscillator(),g=a.createGain();o.frequency.value=n;o.type='triangle';g.gain.setValueAtTime(.05,a.currentTime);g.gain.exponentialRampToValueAtTime(.001,a.currentTime+.16);o.connect(g).connect(a.destination);o.start();o.stop(a.currentTime+.16)}catch(e){}}
+function spin(){if(s.locked||s.enemy)return;if(s.coins<s.bet){toast('Not enough coins.');$('auto').checked=false;return}s.locked=true;s.coins-=s.bet;s.spins++;s.contract=Math.min(3,s.contract+1);ui();$('spin').disabled=true;reels.forEach(r=>{r.classList.add('spin');r.classList.remove('win')});let out=[0,0,0].map(()=>s.lucky?Math.floor(Math.random()*3):Math.floor(Math.random()*symbols.length));s.lucky=false;setTimeout(()=>{reels.forEach((r,i)=>{r.classList.remove('spin');r.querySelector('span').textContent=symbols[out[i]][0]});resolve(out)},600)}
+function resolve(out){let names=out.map(i=>symbols[i][1]),d=names.filter(x=>x==='DAGGER').length,pay=0,msg='No match. The house keeps its edge.';if(names.every(x=>x==='DAGGER')){pay=100;msg='TRIPLE DAGGER. The den doors open.'}else if(names[0]===names[1]&&names[1]===names[2]){pay=s.bet*symbols[out[0]][2];if(s.class==='gambler')pay=Math.ceil(pay*1.1);msg=`TRIPLE ${names[0]}. +${pay} coins.`}else if(names[0]===names[1]||names[1]===names[2]||names[0]===names[2]){pay=s.bet;msg='PAIR MATCH. Wager returned.'}if(s.risk){if(pay){pay*=2;msg+=' RISK BONUS x2.'}else{s.coins=Math.max(0,s.coins-s.bet);msg='RISK FAILED. Wager doubled into the dark.'}}if(pay){s.coins+=pay;reels.forEach(r=>r.classList.add('win'));tone(660)}if(d){s.charge=Math.min(3,s.charge+d);msg+=` +${d} charge.`}if(s.contract===3){s.coins+=60;s.contract=4;msg+=' DAILY CONTRACT +60.'}s.risk=false;$('risk').classList.remove('on');$('risk').querySelector('b').textContent='OFF';s.best=Math.max(s.best,s.coins);s.round++;note(msg);tone(pay?660:180);if(s.charge>=3)boss();s.locked=false;$('spin').disabled=false;ui();if($('auto').checked&&s.coins>=s.bet&&!s.enemy)setTimeout(spin,500)}
+function boss(){if(s.enemy)return;let b=bosses[s.bosses%bosses.length];s.enemy=b;s.hp=b[2];$('state').textContent='TARGET LOCKED';$('art').textContent=b[1];$('enemy').textContent=b[0];$('copy').textContent=`${b[0]} blocks the vault. Strike now.`;$('strike').disabled=false;$('guard').disabled=false;$('health').style.width='100%';document.querySelector('.den').classList.add('ready');toast(`${b[0]} entered the den.`);tone(260)}
+function combat(kind){if(!s.enemy)return;if(kind==='strike'){s.hp-=1+(s.class==='assassin'?1:0)+s.level;tone(330)}else{s.coins+=s.class==='knight'?20:10} $('health').style.width=Math.max(0,s.hp/s.enemy[2]*100)+'%';if(s.hp<=0){let b=s.enemy;s.coins+=b[3];s.bosses++;s.charge=0;s.enemy=null;document.querySelector('.den').classList.remove('ready');$('state').textContent='CLEARED';$('art').textContent='☠';$('enemy').textContent='NO TARGET';$('copy').textContent=`Bounty collected: +${b[3]} coins.`;$('strike').disabled=true;$('guard').disabled=true;note(`${b[0]} defeated. Bounty +${b[3]}.`);toast('Boss cleared.');tone(780)}ui()}
+function buy(cost,fn){if(s.coins<cost)return toast('Not enough coins.');s.coins-=cost;fn();ui()}$('spin').onclick=spin;$('strike').onclick=()=>combat('strike');$('guard').onclick=()=>combat('guard');$('down').onclick=()=>{s.bet=Math.max(1,s.bet-1);ui()};$('up').onclick=()=>{s.bet=Math.min(s.level?40:25,s.bet+1);ui()};$('risk').onclick=()=>{s.risk=!s.risk;$('risk').classList.toggle('on',s.risk);$('risk').querySelector('b').textContent=s.risk?'ON':'OFF'};document.onkeydown=e=>{if(e.code==='Space'&&s.enemy){e.preventDefault();combat('strike')}};
+document.querySelectorAll('[data-class]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-class]').forEach(x=>x.classList.remove('active'));b.classList.add('active');s.class=b.dataset.class;toast(`${b.textContent.trim()} selected.`)});$('luck').onclick=()=>buy(20,()=>{s.lucky=true;toast('Lucky Coin primed.')});$('relic').onclick=()=>buy(35,()=>{if(s.relics.length>=3)return toast('Loadout full.');let r=relics[s.relics.length];s.relics.push(r);let slot=document.querySelectorAll('.relics i')[s.relics.length-1];slot.className='filled';slot.textContent=r[0]+' '+r[1];toast(`${r[1]} equipped.`)});['blade','vault'].forEach(id=>$(id).onclick=()=>buy(45,()=>{s.level++;toast(id==='blade'?'Sharp Edge forged.':'Deep Pockets forged.')}));function toggle(){s.sound=!s.sound;$('sound').textContent=s.sound?'♫':'♪'}$('sound').onclick=toggle;$('reset').onclick=()=>location.reload();let dialog=$('dialog');$('help').onclick=()=>dialog.showModal();$('manual').onclick=()=>dialog.showModal();$('close').onclick=()=>dialog.close();ui();
