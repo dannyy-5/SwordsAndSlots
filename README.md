@@ -1,6 +1,6 @@
-# Swords & Slots
+# SwordsAndSlots
 
-**Slots & Daggers** is a self-contained, browser-playable rogue-like slot machine. Spin for coins, take calculated risks, build a loadout, and use dagger charge to fight bosses in the Black Vault.
+**SwordsAndSlots** is a self-contained, browser-playable rogue-like slot machine. Spin for coins, take calculated risks, build a loadout, and use sword charge to fight bosses in the Black Vault.
 
 The current build uses a turn-based deckbuilder loop inspired by a physical retro arcade cabinet: your icon pool is the deck, each reel is a draw, and every completed spin gives the enemy an opportunity to answer.
 
@@ -50,7 +50,7 @@ The three dagger reward takes priority over the regular matching-symbol payout. 
 - Fully playable slot machine with animated reels and wager controls.
 - Five symbol types with distinct payouts and readable result messaging.
 - Auto-spin mode that stops when you are broke or combat begins.
-- Dagger Den combat loop with four escalating bosses, health bars, strikes, guards, and bounty rewards.
+- Vault Den combat loop with four escalating bosses, health bars, strikes, guards, and bounty rewards.
 - Three character classes: Assassin, Gambler, and Knight, each with a different advantage.
 - Relic loadout, shop items, forge upgrades, wild Lucky Coin events, risk wagering, and daily contracts.
 - Persistent run stats for coins, best balance, spins, and enemies defeated.
