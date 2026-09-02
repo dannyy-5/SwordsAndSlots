@@ -2,6 +2,18 @@
 
 **Slots & Daggers** is a self-contained, browser-playable rogue-like slot machine. Spin for coins, take calculated risks, build a loadout, and use dagger charge to fight bosses in the Black Vault.
 
+The current build uses a turn-based deckbuilder loop inspired by a physical retro arcade cabinet: your icon pool is the deck, each reel is a draw, and every completed spin gives the enemy an opportunity to answer.
+
+## Turn Loop
+
+1. Press **SPIN REELS** to begin the player turn. The reels animate continuously.
+2. Press **STOP ACTIVE REEL** once for each reel, from left to right. The stopped symbols form this turn's action set.
+3. Matching three symbols creates a combo crit and triples the action. Dagger, shield, coin, poison, bomb, multiplier, and joker symbols each contribute differently.
+4. The resolved action hits enemy Shield before enemy HP. Poison bypasses shield, while the enemy's displayed physical and arcane intent attacks after the reels resolve.
+5. Defeat the target, spend the gold that erupts from the cabinet in the shop, and add permanent Meta-Chips to your saved bank when a run ends.
+
+The game is intentionally an original homage to industrial arcade cabinet design. It does not use the reference game's branding, artwork, or source assets.
+
 ## Play Online
 
 Once GitHub Pages is enabled for this repository, play at [dannyy-5.github.io/Dagger-](https://dannyy-5.github.io/Dagger-/). The included GitHub Actions workflow publishes the game automatically whenever `main` changes.
