@@ -1,4 +1,4 @@
-# Slots & Daggers
+# Swords & Slots
 
 **Slots & Daggers** is a self-contained, browser-playable rogue-like slot machine. Spin for coins, take calculated risks, build a loadout, and use dagger charge to fight bosses in the Black Vault.
 
