@@ -16,11 +16,11 @@ The game is intentionally an original homage to industrial arcade cabinet design
 
 ## Play Online
 
-Once GitHub Pages is enabled for this repository, play at [dannyy-5.github.io/Dagger-](https://dannyy-5.github.io/Dagger-/). The included GitHub Actions workflow publishes the game automatically whenever `main` changes.
+Once GitHub Pages is enabled for this repository, play at [dannyy-5.github.io/SwordsAndSlots](https://dannyy-5.github.io/SwordsAndSlots/). The included GitHub Actions workflow publishes the game automatically whenever `main` changes.
 
 ## How to Play
 
-1. Open the [live game](https://dannyy-5.github.io/Dagger-/), or open `index.html` locally.
+1. Open the [live game](https://dannyy-5.github.io/SwordsAndSlots/), or open `index.html` locally.
 2. Set your wager with the `-` and `+` controls. Wagers range from 1 to 25 coins.
 3. Select **SPIN REELS**. The wager is removed immediately, then the three reels resolve.
 4. Build your coin balance through matching symbols. Turn on **AUTO** to keep spinning until you run out of coins or unlock a target.
